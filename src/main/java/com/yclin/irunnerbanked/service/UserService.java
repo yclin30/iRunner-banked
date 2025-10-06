@@ -2,6 +2,7 @@ package com.yclin.irunnerbanked.service;
 
 import com.yclin.irunnerbanked.model.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.yclin.irunnerbanked.model.request.UpdateUserRequest;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -27,4 +28,11 @@ public interface UserService extends IService<User> {
      * @return 脱敏后数据
      */
     User userlogin(String userAccount, String userPassword, HttpServletRequest request);
+
+    int updateUser(UpdateUserRequest userUpdateRequest, User loginUser);
+
+    User getSafetyUser(User originUser);
+
+    User getLoginUser(HttpServletRequest request);
+
 }

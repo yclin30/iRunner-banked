@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yclin.irunnerbanked.mapper.PostMapper">
+
+    <!--
+        id: 对应 Mapper 接口中的方法名
+        resultType: 返回值的类型，这里是我们创建的 PostVO
+    -->
+    <select id="selectPostVOPage" resultType="com.yclin.irunnerbanked.model.vo.PostVO">
+        SELECT
+            p.id,
+            p.user_id,
+            p.activity_id,
+            p.content,
+            p.image_urls,
+            p.create_time,
+            u.username AS authorUsername,
+            u.avatarurl AS authorAvatarUrl
+        FROM
+            post p
+                LEFT JOIN
+            user u ON p.user_id = u.id
+            ${ew.customSqlSegment}
+    </select>
+</mapper>

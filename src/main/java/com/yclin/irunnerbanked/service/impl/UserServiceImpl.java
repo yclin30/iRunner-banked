@@ -4,6 +4,7 @@ import java.util.Date;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yclin.irunnerbanked.model.domain.User;
+import com.yclin.irunnerbanked.model.request.UpdateUserRequest;
 import com.yclin.irunnerbanked.service.UserService;
 import com.yclin.irunnerbanked.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,9 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.yclin.irunnerbanked.constant.UserConstant.SALT;
+import static com.yclin.irunnerbanked.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
 * @author yclin
@@ -29,8 +33,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Resource
     private  UserMapper userMapper;
 
-    private final static String SALT = "lyc";
-    private final static String USER_LOGIN_STATE = "userLoginState";
+
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
@@ -119,14 +122,73 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyuser.setAvatarurl(user.getAvatarurl());
         safetyuser.setGender(user.getGender());
         safetyuser.setEmail(user.getEmail());
+        safetyuser.setUserrole(user.getUserrole());
         safetyuser.setUserstatus(user.getUserstatus());
         safetyuser.setPhone(user.getPhone());
         safetyuser.setCreatetime(user.getCreatetime());
-
-
-
-
         return safetyuser;
+    }
+
+
+    /**
+     * 更新用户信息
+     *
+     * @param userUpdateRequest 更新请求参数
+     * @param loginUser         当前登录用户
+     * @return
+     */
+    @Override
+    public int updateUser(UpdateUserRequest userUpdateRequest, User loginUser) {
+        Long userId = loginUser.getId();
+        User oldUser = this.getById(userId);
+        if (oldUser == null) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        User userToUpdate = new User();
+        userToUpdate.setId(userId);
+        userToUpdate.setUsername(userUpdateRequest.getUsername());
+        userToUpdate.setAvatarurl(userUpdateRequest.getAvatarUrl());
+        userToUpdate.setGender(userUpdateRequest.getGender());
+        userToUpdate.setPhone(userUpdateRequest.getPhone());
+        userToUpdate.setEmail(userUpdateRequest.getEmail());
+
+        // 使用 MyBatis-Plus 的 updateById 方法，它会自动忽略 null 值的字段
+        boolean result = this.updateById(userToUpdate);
+        if (!result) {
+            throw new RuntimeException("更新失败");
+        }
+        return 1; // 返回1表示成功更新1条记录
+    }
+    @Override
+    public User getLoginUser(HttpServletRequest request) {
+        Object userObject = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if (userObject == null) {
+            throw new RuntimeException("用户未登录");
+        }
+        return (User) userObject;
+    }
+
+
+    @Override
+    public User getSafetyUser(User originUser) {
+        if (originUser == null) {
+            return null;
+        }
+        User safetyUser = new User();
+        safetyUser.setId(originUser.getId());
+        safetyUser.setUsername(originUser.getUsername());
+        safetyUser.setUseraccount(originUser.getUseraccount());
+        safetyUser.setAvatarurl(originUser.getAvatarurl());
+        safetyUser.setGender(originUser.getGender());
+        safetyUser.setEmail(originUser.getEmail());
+        safetyUser.setUserrole(originUser.getUserrole());
+        safetyUser.setUserstatus(originUser.getUserstatus());
+        safetyUser.setPhone(originUser.getPhone());
+        safetyUser.setCreatetime(originUser.getCreatetime());
+        // 确保密码字段为 null
+        safetyUser.setUserpassword(null);
+        return safetyUser;
     }
 }
 
