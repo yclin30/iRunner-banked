@@ -25,4 +25,13 @@ public interface PostService extends IService<Post> {
     long addPost(PostAddRequest postAddRequest, User loginUser);
 
     IPage<PostVO> listPostVOByPage(Page<Post> page);
+
+
+    /**
+     * 删除动态
+     * @param postId    动态ID
+     * @param loginUser 当前登录用户
+     * @return 是否删除成功
+     */
+    boolean deletePost(long postId, User loginUser);
 }

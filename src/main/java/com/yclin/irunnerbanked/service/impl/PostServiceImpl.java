@@ -78,4 +78,24 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         // 调用我们自定义的 Mapper 方法
         return this.baseMapper.selectPostVOPage(page, queryWrapper);
     }
+    // ... 在 PostServiceImpl.java 中添加以下方法的实现 ...
+
+    @Override
+    public boolean deletePost(long postId, User loginUser) {
+        // 1. 查询动态是否存在
+        Post post = this.getById(postId);
+        if (post == null) {
+            throw new RuntimeException("动态不存在");
+        }
+
+        // 2. 【安全】校验该动态是否属于当前登录用户
+        if (!post.getUserId().equals(loginUser.getId())) {
+            throw new RuntimeException("无权删除他人的动态");
+        }
+
+        // 3. 执行删除操作
+        // 因为你配置了逻辑删除, MyBatis-Plus 会自动将这条语句转换为:
+        // UPDATE post SET is_deleted = 1 WHERE id = ? AND is_deleted = 0
+        return this.removeById(postId);
+    }
 }

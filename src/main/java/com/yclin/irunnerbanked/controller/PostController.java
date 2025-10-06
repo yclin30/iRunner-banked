@@ -50,4 +50,25 @@ public class PostController {
 
         return ResultUtils.success(postVOPage);
     }
+    /**
+     * 删除动态
+     *
+     * @param postId  要删除的动态ID
+     * @param request 用于获取当前用户
+     * @return
+     */
+    @DeleteMapping("/delete/{postId}")
+    public BaseResponse deletePost(@PathVariable long postId, HttpServletRequest request) {
+        // 1. 获取当前登录用户
+        User loginUser = userService.getLoginUser(request);
+
+        // 2. 调用 Service 层执行删除和权限校验
+        boolean result = postService.deletePost(postId, loginUser);
+
+        // 3. 返回结果
+        if (!result) {
+            return ResultUtils.error(500, "删除失败");
+        }
+        return ResultUtils.success(true);
+    }
 }
